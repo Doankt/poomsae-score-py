@@ -20,7 +20,7 @@ class Score:
     def total_avg(self):
         return round(self.accuracy + self.presentation, 1)
     
-    def __str__(self):
+    def __repr__(self):
         return str(self.accuracy) + ', ' + str(self.presentation)
 
 
