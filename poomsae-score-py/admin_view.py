@@ -32,11 +32,14 @@ class AdminFrame(tk.Frame):
         self.pack_propagate(False)
 
     def _frame_create(self):
-        self.lab = tk.Label(self, text='LAAAAAAAAABEL')
-        self.lab.pack()
+        self.division_name_label = tk.Label(self, text='No division active')
+        self.division_name_label.pack()
 
         self.aud_view_button = tk.Button(self, text='Show Audience View')
         self.aud_view_button.pack(side=tk.BOTTOM)
 
         self.open_division_button = tk.Button(self, text='Open division')
         self.open_division_button.pack()
+
+        self.open_to_web_button = tk.Button(self, text='Open to Web')
+        self.open_to_web_button.pack()
