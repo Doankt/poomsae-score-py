@@ -21,7 +21,8 @@ class Score:
         return round(self.accuracy + self.presentation, 1)
     
     def __repr__(self):
-        return str(self.accuracy) + ', ' + str(self.presentation)
+        ret = 'Score({}, {})'
+        return ret.format(str(self.accuracy), str(self.presentation))
 
 
 def gen_random_score():
