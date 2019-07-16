@@ -1,8 +1,8 @@
 class Competitor:
-    def __init__(self, fn = '', ln = ''):
-        self.first_name = fn
-        self.last_name = ln
-        
+    def __init__(self, delim_name=''):
+        self.delim_name = delim_name
+
     def __repr__(self):
-        ret = 'Score({} {})'
-        return ret.format(self.first_name, self.last_name)
+        ret = 'Competitor({}, {})'
+        sname = self.delim_name.split('~')
+        return ret.format(sname[0], sname[1])
