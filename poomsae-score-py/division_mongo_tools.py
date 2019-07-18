@@ -2,11 +2,14 @@ import json
 from bson.objectid import ObjectId
 import pymongo
 from passlib.hash import argon2
+from validate_email import validate_email
 
-from division import Division
-from competitor import Competitor
-from score import Score
-from fullscore import FullScore
+
+
+import exceptions
+from model.division import Division
+from model.competitor import Competitor
+from model.fullscore import FullScore
 
 USER_MNGR_USER = 'userManager'
 USER_MNGR_PASSWD = 'mg1ImFbYgdYRi9gt'
@@ -46,6 +49,7 @@ def _psdiv_encode(division):
     return ret
 
 
+# Change to update
 def upload_division(division):
     enco = _psdiv_encode(division)
 
@@ -61,36 +65,32 @@ def upload_division(division):
     print(res.inserted_id)
     return ObjectId(res.inserted_id)
 
-
-#
-# def create_account_test():
-#     client = pymongo.MongoClient(
-#         "mongodb+srv://{username}:{password}@poomsaescore-rpi4g.mongodb.net/test?retryWrites=true&w=majority".format(
-#             username = 'doankt',
-#             password = 'Buy1get1free'
-#     ))
-#     working_db = client['tournaments']
-#     print(working_db)
-#     # working_collection = working_db['Test Tournament']
-#     res = working_db.command('createUser', 'name')
-#     print(res)
-
-# create_account_test()
-def create_user(email, passwd):
+def create_user(username, email, passwd):
     client = pymongo.MongoClient(
         "mongodb+srv://{username}:{password}@poomsaescore-rpi4g.mongodb.net/test?retryWrites=true&w=majority".format(
             username=USER_MNGR_USER,
             password=USER_MNGR_PASSWD))
-    print(client)
     users_db = client['users']
-    print(users_db)
+    users_collection = users_db['tournamentAdmins']
 
-    tadmin_collection = users_db['tournamentAdmins']
-    if not tadmin_collection.count_documents({'email': email}):
-        tadmin_collection.insert_one({'email': email,
-                                      'hashed_password': argon2.hash(passwd)})
-        print('Account created')
-    else:
-        print('email taken')
+    if tadmin_collection.count_documents({'email': email}): raise exceptions.EmailAlreadyExists(email)
+    if tadmin_collection.count_documents({'user': username}): raise exceptions.UserAlreadyExists(username)
+    if not validate_email(email): raise exceptions.InvalidEmail(email)
 
-create_user('q', 'q')
+    users_collection.insert_one({'email': email, 'username': username, 'hashed_password': argon2.hash(passwd)})
+
+
+def login_authenticate(username, passwd):
+    client = pymongo.MongoClient(
+        "mongodb+srv://{username}:{password}@poomsaescore-rpi4g.mongodb.net/test?retryWrites=true&w=majority".format(
+            username=USER_MNGR_USER,
+            password=USER_MNGR_PASSWD))
+    users_db = client['users']
+    users_collection = users_db['tournamentAdmins']
+
+    doc = users_collection.find_one({'username': username})
+    print(doc)
+    if not doc: raise exceptions.UserDoesNotExist
+
+    return argon2.verify(passwd, doc['hashed_password'])
+
