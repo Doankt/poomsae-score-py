@@ -6,10 +6,10 @@ from collections import namedtuple
 # import model.competitor
 # import model.division
 
-import model
+from frames.menu_frame import MenuFrame
 
 if __name__ == '__main__':
     app = wx.App()
-    frame = wx.Frame(parent=None, title="test")
-    frame.Show()
+    frame = MenuFrame()
+    frame = MenuFrame()
     app.MainLoop()
