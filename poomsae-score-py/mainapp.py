@@ -8,8 +8,9 @@ from collections import namedtuple
 
 from frames.menu_frame import MenuFrame
 
+
 if __name__ == '__main__':
     app = wx.App()
     frame = MenuFrame()
-    frame = MenuFrame()
+    # frame = MenuFrame()
     app.MainLoop()
