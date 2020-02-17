@@ -1,9 +1,11 @@
 import wx
+import frames.menu_bar
+import frames.new_division_frame
 
 
 class MenuFrame(wx.Frame):
-    def __init__(self):
-        super().__init__(parent=None, title="Menu")
+    def __init__(self, par=None):
+        super().__init__(par, title="Menu")
 
         panel = wx.Panel(self)
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -18,9 +20,14 @@ class MenuFrame(wx.Frame):
 
         panel.SetSizer(sizer)
 
+        mf = frames.menu_bar.MainMenuBar()
+        self.SetMenuBar(mf)
+
         self.Show()
 
     def open_new(self, event):
-        print(event)
+        nd = frames.new_division_frame.NewDivisionFrame(self)
+        self.Disable()
+        nd.Show()
         
 
