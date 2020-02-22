@@ -16,13 +16,14 @@ class MainHandler(wx.App):
 
 
 if __name__ == '__main__':
-    app = MainHandler()
+    # app = MainHandler()
     # frame = MenuFrame()
 
-    # ard1 = controller.Controller('COM8')
-    # ard1.start()
-    # while True:
-    #     print(ard1.score)
-    #     time.sleep(1)
+    ard1 = controller.Controller('COM8')
+    ard1.start()
+    while True:
+        print(ard1.score, sum(ard1.score))
+        time.sleep(1)
+        # ard1.stop()
 
-    app.MainLoop()
+    # app.MainLoop()

@@ -1,13 +1,17 @@
 #include <PushButton.h>
 #include <SoftwareSerial.h>
+#include <LiquidCrystal_I2C.h>
 
 SoftwareSerial bt(2,3);
-int RESET_BUTTON = 5;
-int BT_POWER = 4;
-int DATA_BUTTON = 6;
-int PING_TIMEOUT = 2000; //in ms
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
-int imode = 0;
+#define BT_POWER 4
+#define RESET_BUTTON 5
+#define DATA_BUTTON 6
+#define PING_TIMEOUT 2000 //in ms
+
+
+int imode = 1;
 
 float score[2];
 unsigned long last_ping;
@@ -15,6 +19,10 @@ unsigned long last_ping;
 
 PushButton reset_pb(RESET_BUTTON);
 PushButton data_pb(DATA_BUTTON);
+//PushButton add_major_pb();
+//PushButton add_minor_pb();
+//PushButton sub_major_pb();
+//PushButton sub_minor_pb();
 
 void interface_write(const char* str){
   switch(imode){
@@ -23,16 +31,37 @@ void interface_write(const char* str){
       break;
     case 1:
       bt.write(str);
+      break;
     default:
       break;
   }
+}
+
+void update_lcd(){
+	lcd.setCursor(0,0);
+  char res[5];
+  dtostrf(score[0], 2, 1, res);
+	lcd.print("Acc: ");
+	lcd.print(res);
+	lcd.setCursor(0,1);
+	
+	dtostrf(score[1], 2, 1, res);
+	lcd.print("Pres: ");
+	lcd.print(res);
+	lcd.setCursor(0,2);
+
+	dtostrf(score[0] + score[1], 2, 1, res);
+	lcd.print("Total: ");
+  lcd.print(res);
 }
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   bt.begin(9600);
-
+  
+  lcd.init();
+  lcd.backlight();
 
   pinMode(RESET_BUTTON, INPUT);
   
@@ -41,8 +70,8 @@ void setup() {
 
   pinMode(DATA_BUTTON, INPUT);
 
-  score[0] = 2.4;
-  score[1] = 4.2;
+  score[0] = 0.0;
+  score[1] = 0.0;
  
 }
 
@@ -50,6 +79,9 @@ void loop() {
   // put your main code here, to run repeatedly:
   reset_pb.update();
   data_pb.update();
+  update_lcd();
+
+
 
   if(reset_pb.isClicked()){
     Serial.println("Hit reset");
@@ -71,9 +103,10 @@ void loop() {
     
     interface_write(",");
 
-    dtostrf(score[1], 2, 3, res);
+    dtostrf(score[1], 2, 1, res);
     interface_write(res);
     interface_write(">");
+    Serial.print("AA\n");
   }
 
   

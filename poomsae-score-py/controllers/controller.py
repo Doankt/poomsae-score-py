@@ -1,13 +1,25 @@
 from serial import *
 import time
 import threading
+import controllers.controller_exceptions
 
-CONTROLLER_TIMEOUT = 12
+CONTROLLER_TIMEOUT = 10
+
+class ControllerDisconnectException(Exception):
+    def __init__(self, port):
+        super().__init__(self)
+        self.message = "{} controller disconnected".format(port)
+
+    def __str__(self):
+        return self.message
 
 def _read_thread(controller):
     last_ping = time.time()
     while True:
         try:
+            if controller.stop_flag:
+                break
+
             data = controller.ser.read(1)
             if data == b'<':
                 string = ""
@@ -21,10 +33,10 @@ def _read_thread(controller):
                 last_ping = time.time()
 
             if((time.time() - last_ping) >= CONTROLLER_TIMEOUT):
-                raise SerialException()
+                raise ControllerDisconnectException(controller.ser.port)
             time.sleep(0.5)
 
-        except SerialException:
+        except ControllerDisconnectException:
             print("Controller Disconnected")
             retry = 0
 
@@ -43,28 +55,29 @@ def _read_thread(controller):
             if retry >= 3:
                 print("controller failed to reconnect")
                 break
+            print("controller reconnected")
     print("eot")
 
 
-class Controller():
+class Controller:
 
     def __init__(self, port):
         self.ser = Serial(port, baudrate=9600, timeout=5)
         self.score = []
         self.read_thread = None
-
+        self.stop_flag = -1
 
     def start(self):
-        self.read_thread = threading.Thread(target=_read_thread, args=(self,))
-        self.read_thread.daemon = True
-        self.read_thread.start()
+        if not self.read_thread:
+            self.read_thread = threading.Thread(target=_read_thread, args=(self,))
+            self.read_thread.daemon = True
+            self.stop_flag = 0
+            self.read_thread.start()
 
     def attempt_reconnect(self, p, b, t):
         self.ser.close()
         self.ser = Serial(p, baudrate=b, timeout=t)
 
-
-    def _ping(self):
-        pass
-
-
+    def stop(self):
+        self.stop_flag = 1
+        self.read_thread = None
