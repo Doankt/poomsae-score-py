@@ -34,17 +34,16 @@ def _read_thread(controller):
 
             if((time.time() - last_ping) >= CONTROLLER_TIMEOUT):
                 raise ControllerDisconnectException(controller.ser.port)
-            time.sleep(0.5)
 
-        except ControllerDisconnectException:
-            print("Controller Disconnected")
+        except:
+            print("Controller {} Disconnected".format(controller.ser.port))
             retry = 0
 
             port = controller.ser.port
             baud = controller.ser.baudrate
             timeo = controller.ser.timeout
 
-            while retry < 3:
+            while retry < 5:
                 print("retry:", retry)
                 try:
                     controller.attempt_reconnect(port, baud, timeo)
@@ -55,7 +54,7 @@ def _read_thread(controller):
             if retry >= 3:
                 print("controller failed to reconnect")
                 break
-            print("controller reconnected")
+            print("Controller {} Reconnected".format(controller.ser.port))
     print("eot")
 
 

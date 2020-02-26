@@ -2,16 +2,15 @@
 #include <SoftwareSerial.h>
 #include <LiquidCrystal_I2C.h>
 
-SoftwareSerial bt(2,3);
-LiquidCrystal_I2C lcd(0x27, 20, 4);
+SoftwareSerial bt(2,3); // btTXD - 2, btRXD - 3
+LiquidCrystal_I2C lcd(0x27, 20, 4); // SDA - A4, SCL - A5
 
 #define BT_POWER 4
 #define RESET_BUTTON 5
 #define DATA_BUTTON 6
 #define PING_TIMEOUT 2000 //in ms
 
-
-int imode = 1;
+int IMODE = 0;
 
 float score[2];
 unsigned long last_ping;
@@ -25,7 +24,7 @@ PushButton data_pb(DATA_BUTTON);
 //PushButton sub_minor_pb();
 
 void interface_write(const char* str){
-  switch(imode){
+  switch(IMODE){
     case 0:
       Serial.write(str);
       break;
