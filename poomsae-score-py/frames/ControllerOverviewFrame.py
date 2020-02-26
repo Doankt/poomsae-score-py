@@ -31,44 +31,30 @@ class ControllerOverviewFrame(wx.Frame):
 		self.SetSize((487, 448))
 		self.controller1_port = wx.StaticText(self, wx.ID_ANY, "NOT CONNECTED")
 		self.c1_connection_button = ConnectionButton(self, wx.ID_ANY, "CONNECT")
-		self.c1_dc_button = ConnectionButton(self, wx.ID_ANY, "DISCONNECT")
 		self.controller2_port = wx.StaticText(self, wx.ID_ANY, "NOT CONNECTED")
 		self.c2_connection_button = ConnectionButton(self, wx.ID_ANY, "CONNECT")
-		self.c2_dc_button = ConnectionButton(self, wx.ID_ANY, "DISCONNECT")
 		self.controller3_port = wx.StaticText(self, wx.ID_ANY, "NOT CONNECTED")
 		self.c3_connection_button = ConnectionButton(self, wx.ID_ANY, "CONNECT")
-		self.c3_dc_button = ConnectionButton(self, wx.ID_ANY, "DISCONNECT")
 		self.controller4_port = wx.StaticText(self, wx.ID_ANY, "NOT CONNECTED")
 		self.c4_connection_button = ConnectionButton(self, wx.ID_ANY, "CONNECT")
-		self.c4_dc_button = ConnectionButton(self, wx.ID_ANY, "DISCONNECT")
 		self.controller5_port = wx.StaticText(self, wx.ID_ANY, "NOT CONNECTED")
 		self.c5_connection_button = ConnectionButton(self, wx.ID_ANY, "CONNECT")
-		self.c5_dc_button = ConnectionButton(self, wx.ID_ANY, "DISCONNECT")
 		self.controller6_port = wx.StaticText(self, wx.ID_ANY, "NOT CONNECTED")
 		self.c6_connection_button = ConnectionButton(self, wx.ID_ANY, "CONNECT")
-		self.c6_dc_button = ConnectionButton(self, wx.ID_ANY, "DISCONNECT")
 		self.controller7_port = wx.StaticText(self, wx.ID_ANY, "NOT CONNECTED")
 		self.c7_connection_button = ConnectionButton(self, wx.ID_ANY, "CONNECT")
-		self.c7_dc_button = ConnectionButton(self, wx.ID_ANY, "DISCONNECT")
 		self.close_button = wx.Button(self, wx.ID_ANY, "Close")
 
 		self.__set_properties()
 		self.__do_layout()
 
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c1_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.disconnect_slot, self.c1_dc_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c2_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.disconnect_slot, self.c2_dc_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c3_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.disconnect_slot, self.c3_dc_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c4_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.disconnect_slot, self.c4_dc_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c5_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.disconnect_slot, self.c5_dc_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c6_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.disconnect_slot, self.c6_dc_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c7_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.disconnect_slot, self.c7_dc_button)
 		self.Bind(wx.EVT_BUTTON, self.Close, self.close_button)
 		# end wxGlade
 		self.Bind(wx.EVT_CLOSE, self.Close)
@@ -83,26 +69,12 @@ class ControllerOverviewFrame(wx.Frame):
 		# begin wxGlade: ControllerOverviewFrame.__set_properties
 		self.SetTitle("frame")
 		self.c1_connection_button.SetC_num(0)
-		self.c1_dc_button.Hide()
-		self.c1_dc_button.SetC_num(0)
 		self.c2_connection_button.SetC_num(1)
-		self.c2_dc_button.Hide()
-		self.c2_dc_button.SetC_num(1)
 		self.c3_connection_button.SetC_num(2)
-		self.c3_dc_button.Hide()
-		self.c3_dc_button.SetC_num(2)
 		self.c4_connection_button.SetC_num(3)
-		self.c4_dc_button.Hide()
-		self.c4_dc_button.SetC_num(3)
 		self.c5_connection_button.SetC_num(4)
-		self.c5_dc_button.Hide()
-		self.c5_dc_button.SetC_num(4)
 		self.c6_connection_button.SetC_num(5)
-		self.c6_dc_button.Hide()
-		self.c6_dc_button.SetC_num(5)
 		self.c7_connection_button.SetC_num(6)
-		self.c7_dc_button.Hide()
-		self.c7_dc_button.SetC_num(6)
 		# end wxGlade
 
 		self.label_list = [
@@ -114,7 +86,7 @@ class ControllerOverviewFrame(wx.Frame):
 			self.controller6_port,
 			self.controller7_port
 		]
-		self.connect_button_list = [
+		self.button_list = [
 			self.c1_connection_button,
 			self.c2_connection_button,
 			self.c3_connection_button,
@@ -123,27 +95,14 @@ class ControllerOverviewFrame(wx.Frame):
 			self.c6_connection_button,
 			self.c7_connection_button,
 		]
-		self.dc_button_list = [
-			self.c1_dc_button,
-			self.c2_dc_button,
-			self.c3_dc_button,
-			self.c4_dc_button,
-			self.c5_dc_button,
-			self.c6_dc_button,
-			self.c7_dc_button
-		]
-
 
 		for i in range(7):
 			if wx.App.Get().controller_list[i] is not None:
 				self.label_list[i].SetLabel('CONNECTED ({})'.format(wx.App.Get().controller_list[i].ser.port))
-				self.connect_button_list[i].Hide()
-				self.dc_button_list[i].Show()
+				self.button_list[i].Disable()
 			else:
 				self.label_list[i].SetLabel('NOT CONNECTED')
-				self.connect_button_list[i].Show()
-				self.dc_button_list[i].Hide()
-		self.Layout()
+				self.button_list[i].Enable()
 
 
 	def __do_layout(self):
@@ -159,31 +118,31 @@ class ControllerOverviewFrame(wx.Frame):
 		sizer_9 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Controller 1"), wx.HORIZONTAL)
 		sizer_9.Add(self.controller1_port, 0, wx.ALIGN_CENTER, 0)
 		sizer_9.Add(self.c1_connection_button, 0, 0, 0)
-		sizer_9.Add(self.c1_dc_button, 0, 0, 0)
+		sizer_9.Add((0, 0), 0, 0, 0)
 		sizer_8.Add(sizer_9, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 0)
 		sizer_10.Add(self.controller2_port, 0, 0, 0)
 		sizer_10.Add(self.c2_connection_button, 0, 0, 0)
-		sizer_10.Add(self.c2_dc_button, 0, 0, 0)
+		sizer_10.Add((0, 0), 0, 0, 0)
 		sizer_8.Add(sizer_10, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 		sizer_11.Add(self.controller3_port, 0, 0, 0)
 		sizer_11.Add(self.c3_connection_button, 0, 0, 0)
-		sizer_11.Add(self.c3_dc_button, 0, 0, 0)
+		sizer_11.Add((0, 0), 0, 0, 0)
 		sizer_8.Add(sizer_11, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 		sizer_12.Add(self.controller4_port, 0, 0, 0)
 		sizer_12.Add(self.c4_connection_button, 0, 0, 0)
-		sizer_12.Add(self.c4_dc_button, 0, 0, 0)
+		sizer_12.Add((0, 0), 0, 0, 0)
 		sizer_8.Add(sizer_12, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 		sizer_13.Add(self.controller5_port, 0, 0, 0)
 		sizer_13.Add(self.c5_connection_button, 0, 0, 0)
-		sizer_13.Add(self.c5_dc_button, 0, 0, 0)
+		sizer_13.Add((0, 0), 0, 0, 0)
 		sizer_8.Add(sizer_13, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 		sizer_14.Add(self.controller6_port, 0, 0, 0)
 		sizer_14.Add(self.c6_connection_button, 0, 0, 0)
-		sizer_14.Add(self.c6_dc_button, 0, 0, 0)
+		sizer_14.Add((0, 0), 0, 0, 0)
 		sizer_8.Add(sizer_14, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 		sizer_15.Add(self.controller7_port, 0, 0, 0)
 		sizer_15.Add(self.c7_connection_button, 0, 0, 0)
-		sizer_15.Add(self.c7_dc_button, 0, 0, 0)
+		sizer_15.Add((0, 0), 0, 0, 0)
 		sizer_8.Add(sizer_15, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
 		sizer_6.Add(self.close_button, 0, wx.ALIGN_BOTTOM | wx.ALIGN_RIGHT, 0)
 		sizer_8.Add(sizer_6, 0, wx.ALIGN_BOTTOM | wx.ALIGN_RIGHT | wx.ALL, 10)
@@ -200,20 +159,13 @@ class ControllerOverviewFrame(wx.Frame):
 		print(f)
 
 
-	def disconnect_slot(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
-		mainapp = wx.App.Get()
-		button = event.GetEventObject()
-		mainapp.controller_list[button.c_num].stop()
-
-
 	def _update_thread(self):
 		while self.continue_update:
 			self.__set_properties()
-			time.sleep(1.5)
+			time.sleep(1)
 
 	def Close(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
 		self.continue_update = False
 		self.Destroy()
-
 
 # end of class ControllerOverviewFrame

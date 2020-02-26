@@ -42,8 +42,6 @@ class AdminFrame(wx.Frame):
 
 		# end wxGlade
 
-		wx.App.Get().controller_list = [None]*7
-
 	def __set_properties(self):
 		# begin wxGlade: AdminFrame.__set_properties
 		self.SetTitle("poomsae-score-py 0.0.1")

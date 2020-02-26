@@ -1,18 +1,7 @@
-import sys
-sys.path.append('..')
-
 from serial import *
 import time
 import threading
-from scoring.score import Score
 import controllers.controller_exceptions
-
-ACC_CHAR = b'!'
-PRES_CHAR = b'@'
-PING_CHAR = b'#'
-SCORE_RESET_CHAR = b'$'
-END_CHAR = b'~'
-
 
 CONTROLLER_TIMEOUT = 10
 
@@ -27,7 +16,7 @@ class ControllerDisconnectException(Exception):
 class Controller:
     def __init__(self, port, mainapp, slotnum):
         self.ser = Serial(port, baudrate=9600, timeout=5)
-        self.score = Score()
+        self.score = []
         self.read_thread = None
         self.continue_read_thread = False
         self.mainapp = mainapp
@@ -40,21 +29,14 @@ class Controller:
         while self.continue_read_thread:
             try:
                 data = self.ser.read(1)
-                print(self.score.total_avg())
-                if data == ACC_CHAR or data == PRES_CHAR:
-                    #Recieving Score
-                    sec = data
+                if data == b'<':
                     string = ""
                     while True:
                         data = self.ser.read(1)
-                        if data == END_CHAR: break
+                        if data == b'>': break
                         string += data.decode('utf-8')
-
-                    if sec == ACC_CHAR:    self.score.accuracy = float(string)
-                    else:   self.score.presentation = float(string)
-                elif data == SCORE_RESET_CHAR:
-                    self.score = Score()
-                elif data == PING_CHAR:
+                    self.score = [float(n) for n in string.split(',')]
+                elif data == b'#':
                     last_ping = time.time()
 
                 if ((time.time() - last_ping) >= CONTROLLER_TIMEOUT):
@@ -72,7 +54,7 @@ class Controller:
                     print("retry:", retry)
                     try:
                         self.attempt_reconnect(port, baud, timeo)
-                        if self.ser.read(1) == PING_CHAR:
+                        if self.ser.read(1) == b'#':
                             break
                     finally:
                         retry += 1
@@ -82,6 +64,7 @@ class Controller:
                     print("controller failed to reconnect")
                     break
                 print("Controller {} Reconnected".format(self.ser.port))
+        self.__del__()
 
     def start(self):
         if not self.read_thread:
@@ -97,10 +80,9 @@ class Controller:
     def stop(self):
         self.continue_read_thread = False
         self.read_thread = None
-        self.__del__()
 
     def __del__(self):
+        print("ented")
         self.continue_read_thread = False
-        self.ser.close()
         self.read_thread = None
         self.mainapp.controller_list[self.slot_num] = None
