@@ -11,6 +11,9 @@ import wx
 from ControllerConnectDialog import *
 # end wxGlade
 
+import threading
+import time
+
 class ConnectionButton(wx.Button):
 	def __init__(self, *args, **kwds):
 		wx.Button.__init__(self, *args, **kwds)
@@ -52,14 +55,55 @@ class ControllerOverviewFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c5_connection_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c6_connection_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c7_connection_button)
-		self.Bind(wx.EVT_BUTTON, self.close_self, self.close_button)
+		self.Bind(wx.EVT_BUTTON, self.Close, self.close_button)
 		# end wxGlade
+		self.Bind(wx.EVT_CLOSE, self.Close)
+
+		self.continue_update = True
+		self.update_thread = threading.Thread(target=self._update_thread)
+		self.update_thread.daemon = True
+		self.update_thread.start()
+
 
 	def __set_properties(self):
 		# begin wxGlade: ControllerOverviewFrame.__set_properties
 		self.SetTitle("frame")
-		self.c1_connection_button.SetC_num(1)
+		self.c1_connection_button.SetC_num(0)
+		self.c2_connection_button.SetC_num(1)
+		self.c3_connection_button.SetC_num(2)
+		self.c4_connection_button.SetC_num(3)
+		self.c5_connection_button.SetC_num(4)
+		self.c6_connection_button.SetC_num(5)
+		self.c7_connection_button.SetC_num(6)
 		# end wxGlade
+
+		self.label_list = [
+			self.controller1_port,
+			self.controller2_port,
+			self.controller3_port,
+			self.controller4_port,
+			self.controller5_port,
+			self.controller6_port,
+			self.controller7_port
+		]
+		self.button_list = [
+			self.c1_connection_button,
+			self.c2_connection_button,
+			self.c3_connection_button,
+			self.c4_connection_button,
+			self.c5_connection_button,
+			self.c6_connection_button,
+			self.c7_connection_button,
+		]
+
+		for i in range(7):
+			if wx.App.Get().controller_list[i] is not None:
+				self.label_list[i].SetLabel('CONNECTED ({})'.format(wx.App.Get().controller_list[i].ser.port))
+				self.button_list[i].Disable()
+			else:
+				self.label_list[i].SetLabel('NOT CONNECTED')
+				self.button_list[i].Enable()
+
 
 	def __do_layout(self):
 		# begin wxGlade: ControllerOverviewFrame.__do_layout
@@ -107,12 +151,21 @@ class ControllerOverviewFrame(wx.Frame):
 		# end wxGlade
 
 	def open_connect_dialog(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
-		print(event)
+		button = event.GetEventObject()
+		print(button.c_num)
+		self.last_called_button = button
 		f = ControllerConnectDialog(self)
 		f.Show()
+		print(f)
 
 
-	def close_self(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
-		print("Event handler 'close_self' not implemented!")
-		event.Skip()
+	def _update_thread(self):
+		while self.continue_update:
+			self.__set_properties()
+			time.sleep(1)
+
+	def Close(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
+		self.continue_update = False
+		self.Destroy()
+
 # end of class ControllerOverviewFrame
