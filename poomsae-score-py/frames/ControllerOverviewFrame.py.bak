@@ -52,6 +52,7 @@ class ControllerOverviewFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c5_connection_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c6_connection_button)
 		self.Bind(wx.EVT_BUTTON, self.open_connect_dialog, self.c7_connection_button)
+		self.Bind(wx.EVT_BUTTON, self.close_self, self.close_button)
 		# end wxGlade
 
 	def __set_properties(self):
@@ -106,7 +107,12 @@ class ControllerOverviewFrame(wx.Frame):
 		# end wxGlade
 
 	def open_connect_dialog(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
+		print(event)
 		f = ControllerConnectDialog(self)
 		f.Show()
 
+
+	def close_self(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
+		print("Event handler 'close_self' not implemented!")
+		event.Skip()
 # end of class ControllerOverviewFrame
