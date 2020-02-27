@@ -9,6 +9,7 @@ import wx
 
 # begin wxGlade: extracode
 from ControllerOverviewFrame import *
+from AudienceFrame import *
 # end wxGlade
 
 
@@ -20,21 +21,22 @@ class AdminFrame(wx.Frame):
 		self.SetSize((400, 300))
 		
 		# Menu Bar
-		self.frame_1_menubar = wx.MenuBar()
+		self.menubar = wx.MenuBar()
 		wxglade_tmp_menu = wx.Menu()
 		wxglade_tmp_menu.Append(wx.ID_ANY, "New Division", "")
 		wxglade_tmp_menu.Append(wx.ID_ANY, "Open Division", "")
-		self.frame_1_menubar.Append(wxglade_tmp_menu, "File")
+		self.menubar.Append(wxglade_tmp_menu, "File")
 		wxglade_tmp_menu = wx.Menu()
-		self.frame_1_menubar.Append(wxglade_tmp_menu, "Edit Division")
+		self.menubar.Append(wxglade_tmp_menu, "Edit Division")
 		wxglade_tmp_menu = wx.Menu()
 		item = wxglade_tmp_menu.Append(wx.ID_ANY, "Setup", "")
 		self.Bind(wx.EVT_MENU, self.open_controller_setup, id=item.GetId())
-		self.frame_1_menubar.Append(wxglade_tmp_menu, "Controllers")
+		self.menubar.Append(wxglade_tmp_menu, "Controllers")
 		wxglade_tmp_menu = wx.Menu()
-		wxglade_tmp_menu.Append(wx.ID_ANY, "Pop Audience View", "")
-		self.frame_1_menubar.Append(wxglade_tmp_menu, "Audience")
-		self.SetMenuBar(self.frame_1_menubar)
+		item = wxglade_tmp_menu.Append(wx.ID_ANY, "Pop Audience View", "")
+		self.Bind(wx.EVT_MENU, self.open_audience_frame, id=item.GetId())
+		self.menubar.Append(wxglade_tmp_menu, "Audience")
+		self.SetMenuBar(self.menubar)
 		# Menu Bar end
 
 		self.__set_properties()
@@ -51,14 +53,18 @@ class AdminFrame(wx.Frame):
 
 	def __do_layout(self):
 		# begin wxGlade: AdminFrame.__do_layout
-		sizer_7 = wx.BoxSizer(wx.VERTICAL)
-		sizer_7.Add((0, 0), 0, 0, 0)
-		self.SetSizer(sizer_7)
+		self.a_view_slot = wx.BoxSizer(wx.VERTICAL)
+		self.a_view_slot.Add((0, 0), 0, 0, 0)
+		self.SetSizer(self.a_view_slot)
 		self.Layout()
 		# end wxGlade
 
 	def open_controller_setup(self, event):  # wxGlade: AdminFrame.<event_handler>
 		f = ControllerOverviewFrame(self)
+		f.Show()
+
+	def open_audience_frame(self, event):  # wxGlade: AdminFrame.<event_handler>
+		f = AudienceFrame(self)
 		f.Show()
 
 # end of class AdminFrame

@@ -81,7 +81,7 @@ class ControllerOverviewFrame(wx.Frame):
 
 	def __set_properties(self):
 		# begin wxGlade: ControllerOverviewFrame.__set_properties
-		self.SetTitle("frame")
+		self.SetTitle("Controller Overview")
 		self.c1_connection_button.SetC_num(0)
 		self.c1_dc_button.Hide()
 		self.c1_dc_button.SetC_num(0)
@@ -214,6 +214,5 @@ class ControllerOverviewFrame(wx.Frame):
 	def Close(self, event):  # wxGlade: ControllerOverviewFrame.<event_handler>
 		self.continue_update = False
 		self.Destroy()
-
 
 # end of class ControllerOverviewFrame

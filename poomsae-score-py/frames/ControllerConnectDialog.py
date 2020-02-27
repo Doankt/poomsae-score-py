@@ -32,10 +32,12 @@ class ControllerConnectDialog(wx.Dialog):
 
 		self.Bind(wx.EVT_LISTBOX, self.check_valid, self.port_listbox)
 		self.Bind(wx.EVT_LISTBOX_DCLICK, self.select_port, self.port_listbox)
-		self.Bind(wx.EVT_BUTTON, self.close_self, self.cancel_button)
+		self.Bind(wx.EVT_BUTTON, self.Close, self.cancel_button)
 		self.Bind(wx.EVT_BUTTON, self.connect_button_handler, self.confirm_button)
 		# end wxGlade
 
+		self.parent = args[0]
+		self.parent.Disable()
 		self.c_num = args[0].last_called_button.c_num
 		print(self.c_num)
 
@@ -64,8 +66,6 @@ class ControllerConnectDialog(wx.Dialog):
 		self.Layout()
 		# end wxGlade
 
-	def close_self(self, event):  # wxGlade: ControllerConnectDialog.<event_handler>
-		self.Destroy()
 
 	def check_valid(self, event):  # wxGlade: ControllerConnectDialog.<event_handler>
 		print(self.port_listbox.GetString(self.port_listbox.GetSelection()))
@@ -85,6 +85,9 @@ class ControllerConnectDialog(wx.Dialog):
 		c.start()
 
 		print(controller.controller_list)
-		self.Destroy()
+		self.Close(event)
 
+	def Close(self, event):  # wxGlade: ControllerConnectDialog.<event_handler>
+		self.parent.Enable()
+		self.Destroy()
 # end of class ControllerConnectDialog

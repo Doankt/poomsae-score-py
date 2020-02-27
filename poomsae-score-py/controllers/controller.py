@@ -52,6 +52,7 @@ class Controller:
 
                     if sec == ACC_CHAR:    self.score.accuracy = float(string)
                     else:   self.score.presentation = float(string)
+                    print(self.score.total_avg())
                 elif data == SCORE_RESET_CHAR:
                     self.score = Score()
                 elif data == PING_CHAR:

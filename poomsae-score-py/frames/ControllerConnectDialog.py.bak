@@ -36,6 +36,8 @@ class ControllerConnectDialog(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.connect_button_handler, self.confirm_button)
 		# end wxGlade
 
+		self.parent = args[0]
+		self.parent.Disable()
 		self.c_num = args[0].last_called_button.c_num
 		print(self.c_num)
 
@@ -65,6 +67,7 @@ class ControllerConnectDialog(wx.Dialog):
 		# end wxGlade
 
 	def close_self(self, event):  # wxGlade: ControllerConnectDialog.<event_handler>
+		self.
 		self.Destroy()
 
 	def check_valid(self, event):  # wxGlade: ControllerConnectDialog.<event_handler>
