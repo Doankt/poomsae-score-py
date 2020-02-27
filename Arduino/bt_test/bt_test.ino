@@ -118,21 +118,21 @@ void pres_lcd_update(int mode, float p[]){
   lcd.setCursor(0,1);
   switch(mode){
     case 0:
-      lcd.print("section 1");
+      lcd.print("SPEED & POWER       ");
       lcd.setCursor(0,2);
 
       dtostrf(p[0], 1, 1, res);
       lcd.print(res);
       break;
     case 1:
-      lcd.print("section 2");
+      lcd.print("STR, SPD, RHYTHM    ");
       lcd.setCursor(0,2);
 
       dtostrf(p[1], 1, 1, res);
       lcd.print(res);
       break;
     case 2:
-      lcd.print("section 3");
+      lcd.print("EXPRESSION OF ENERGY");
       lcd.setCursor(0,2);
 
       dtostrf(p[2], 1, 1, res);
