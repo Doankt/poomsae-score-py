@@ -19,9 +19,12 @@ LiquidCrystal_I2C lcd(0x27, 20, 4); // SDA - A4, SCL - A5
 #define PING_CHAR "#"
 #define SCORE_RESET_CHAR "$"
 #define END_CHAR "~"
+#define RESET_CHAR "%"
+
 
 int IMODE = 0;
-
+String CNAME = "NO COMPETITOR";
+bool RESET_SIG = false;
 float score[2];
 unsigned long last_ping;
 
@@ -44,6 +47,66 @@ void interface_write(const char* str){
     default:
       break;
   }
+}
+
+bool interface_available(){
+  switch(IMODE){
+    case 0:
+      return Serial.available();
+      break;
+    case 1:
+      return bt.available();
+      break;
+    default:
+      break;
+  }
+}
+
+char interface_read(){
+  switch(IMODE){
+    case 0:
+      return Serial.read();
+      break;
+    case 1:
+      return bt.read();
+      break;
+    default:
+      break;
+  }
+}
+
+String interface_readuntil(char c){
+  switch(IMODE){
+    case 0:
+      return Serial.readStringUntil(c);
+      break;
+    case 1:
+      return bt.readStringUntil(c);
+      break;
+    default:
+      break;
+  }
+}
+
+bool reset_char_received(){
+  if(interface_available()){
+    char c = interface_read();
+    if(c == '%'){
+      String t_str = interface_readuntil('~');
+      if(t_str.length() < 20){
+        CNAME = t_str;
+        for(int i=0; i<20-t_str.length(); i++)
+        {
+          CNAME += " ";
+        }
+      } else{
+        CNAME = t_str.substring(0,20);
+      }
+      RESET_SIG = true;
+      return true;
+    }
+  }
+  return false;
 }
 
 void send_ping(){
@@ -71,17 +134,23 @@ void update_all_pb(){
 
 void acc_lcd_update(float acc){
   char res[5];
-  lcd.setCursor(0,0);
+  lcd.setCursor(8,2);
   dtostrf(acc, 1, 1, res);
   lcd.print(res);
 }
 
 void acc_mode(){
   float acc = 4.0;
+  lcd.setCursor(floor((20-CNAME.length())/2),0);
+  lcd.print(CNAME);
+  lcd.setCursor(0,2);
+  lcd.print("ACC:");
   while(true){
     update_all_pb();
     acc_lcd_update(acc);
     send_ping();
+    
+    if(reset_char_received()) break;
     
     if(reset_pb.isClicked()){
       reset_bt();
@@ -113,8 +182,6 @@ void acc_mode(){
 
 void pres_lcd_update(int mode, float p[]){
   char res[5];
-  lcd.setCursor(0,0);
-  lcd.print(mode);
   lcd.setCursor(0,1);
   switch(mode){
     case 0:
@@ -155,11 +222,15 @@ void pres_lcd_update(int mode, float p[]){
 void pres_mode(){
   float pres[3] = {2.0, 2.0, 2.0};
   int section = 0;
+  lcd.setCursor(floor((20-CNAME.length())/2),0);
+  lcd.print(CNAME);
   
   while(true){
     update_all_pb();   
     pres_lcd_update(section, pres);
     send_ping();
+    if(reset_char_received()) break;
+
     
     if(reset_pb.isClicked()){
       reset_bt();
@@ -196,16 +267,18 @@ void pres_mode(){
 
 void total_lcd_update(){
   char res[5];
-  lcd.setCursor(0,0);
+  lcd.setCursor(1,0);
+  lcd.print("WAIT FOR NEXT SYNC");
+  lcd.setCursor(0,1);
   dtostrf(score[0], 2, 1, res);
   lcd.print("Acc: ");
   lcd.print(res);
-  lcd.setCursor(0,1);
+  lcd.setCursor(0,2);
   
   dtostrf(score[1], 2, 1, res);
   lcd.print("Pres: ");
   lcd.print(res);
-  lcd.setCursor(0,2);
+  lcd.setCursor(0,3);
 
   dtostrf(score[0] + score[1], 2, 1, res);
   lcd.print("Total: ");
@@ -217,14 +290,14 @@ void total_mode(){
     update_all_pb();   
     total_lcd_update();
     send_ping();
+    if(reset_char_received()) break;
+
     
     if(reset_pb.isClicked()){
       reset_bt();
     }
     
     if(data_pb.isHeld()){
-      lcd.clear();
-      break;
     }
 
     if(add_major_pb.isClicked()){
@@ -286,12 +359,24 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  RESET_SIG = false;
   acc_mode();
+  if(RESET_SIG) goto reset_sig;
   send_acc();
   
   pres_mode();
+  if(RESET_SIG) goto reset_sig;
   send_pres();
   
   total_mode();
+
+  reset_sig:
+  lcd.clear();
+  lcd.setCursor(6,1);
+  lcd.print("SYNCING");
+  lcd.setCursor(8,2);
+  lcd.print("NEXT");
+  delay(3000);
+  lcd.clear();
   send_score_reset();
 }
