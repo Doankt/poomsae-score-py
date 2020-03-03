@@ -95,10 +95,6 @@ bool reset_char_received(){
       String t_str = interface_readuntil('~');
       if(t_str.length() < 20){
         CNAME = t_str;
-        for(int i=0; i<20-t_str.length(); i++)
-        {
-          CNAME += " ";
-        }
       } else{
         CNAME = t_str.substring(0,20);
       }
