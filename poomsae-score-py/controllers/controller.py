@@ -91,6 +91,11 @@ class Controller:
             self.continue_read_thread = True
             self.read_thread.start()
 
+    def send_reset(self, comp_name):
+        s = '%{}~'.format(comp_name)
+        self.ser.write(s.encode('utf-8'))
+
+
     def attempt_reconnect(self, p, b, t):
         self.ser.close()
         self.ser = Serial(p, baudrate=b, timeout=t)
