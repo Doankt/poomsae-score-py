@@ -11,20 +11,32 @@ import wx
 from ControllerOverviewFrame import *
 from AudienceFrame import *
 # end wxGlade
+import tkinter as tk
+from tkinter import filedialog
+
+root = tk.Tk()
+root.withdraw()
+import time
+import threading
+from division_runner import *
 
 
 class AdminFrame(wx.Frame):
 	def __init__(self, *args, **kwds):
+		self.mainapp = wx.App.Get()
+		self.mainapp.division_runner = None
+
 		# begin wxGlade: AdminFrame.__init__
 		kwds["style"] = kwds.get("style", 0) | wx.DEFAULT_FRAME_STYLE
 		wx.Frame.__init__(self, *args, **kwds)
 		self.SetSize((400, 300))
-		
+
 		# Menu Bar
 		self.menubar = wx.MenuBar()
 		wxglade_tmp_menu = wx.Menu()
 		wxglade_tmp_menu.Append(wx.ID_ANY, "New Division", "")
-		wxglade_tmp_menu.Append(wx.ID_ANY, "Open Division", "")
+		item = wxglade_tmp_menu.Append(wx.ID_ANY, "Open Division", "")
+		self.Bind(wx.EVT_MENU, self.open_division_db, id=item.GetId())
 		self.menubar.Append(wxglade_tmp_menu, "File")
 		wxglade_tmp_menu = wx.Menu()
 		self.menubar.Append(wxglade_tmp_menu, "Edit Division")
@@ -38,26 +50,60 @@ class AdminFrame(wx.Frame):
 		self.menubar.Append(wxglade_tmp_menu, "Audience")
 		self.SetMenuBar(self.menubar)
 		# Menu Bar end
+		self.start_timer_button = wx.Button(self, wx.ID_ANY, "Start Timer")
+		self.stop_timer_button = wx.Button(self, wx.ID_ANY, "Stop Timer")
+		self.reset_timer_button = wx.Button(self, wx.ID_ANY, "Reset Timer")
+		self.reset_all_controllers_button = wx.Button(self, wx.ID_ANY, "Reset All Controllers")
+		self.next_comp_button = wx.Button(self, wx.ID_ANY, "Next Competitor")
+		self.timer_label = wx.StaticText(self, wx.ID_ANY, "None")
 
 		self.__set_properties()
 		self.__do_layout()
 
+		self.Bind(wx.EVT_BUTTON, self.start_timer, self.start_timer_button)
+		self.Bind(wx.EVT_BUTTON, self.stop_timer, self.stop_timer_button)
+		self.Bind(wx.EVT_BUTTON, self.reset_timer, self.reset_timer_button)
+		self.Bind(wx.EVT_BUTTON, self.send_reset_all, self.reset_all_controllers_button)
+		self.Bind(wx.EVT_BUTTON, self.load_next_comp, self.next_comp_button)
 		# end wxGlade
 
-		wx.App.Get().controller_list = [None]*7
+		self.stop_timer_button.Disable()
+		self.reset_timer_button.Disable()
+
+		self.Bind(wx.EVT_CLOSE, self.Close)
+		self.continue_update = True
+		self.mainapp.controller_list = [None] * 7
+		threading.Thread(target=self._update_thread, daemon=True).start()
 
 	def __set_properties(self):
 		# begin wxGlade: AdminFrame.__set_properties
 		self.SetTitle("poomsae-score-py 0.0.1")
 		# end wxGlade
 
+		if self.mainapp.division_runner is not None:
+			if self.mainapp.division_runner.timed_out:
+				self.timer_label.SetLabelText('TO')
+				self.stop_timer(-1)
+			else:
+				self.timer_label.SetLabelText(self.mainapp.division_runner.get_current_time())
+
+
+
 	def __do_layout(self):
 		# begin wxGlade: AdminFrame.__do_layout
 		self.a_view_slot = wx.BoxSizer(wx.VERTICAL)
-		self.a_view_slot.Add((0, 0), 0, 0, 0)
+		sizer_17 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Division Runner"), wx.VERTICAL)
+		sizer_17.Add(self.start_timer_button, 0, 0, 0)
+		sizer_17.Add(self.stop_timer_button, 0, 0, 0)
+		sizer_17.Add(self.reset_timer_button, 0, 0, 0)
+		sizer_17.Add(self.reset_all_controllers_button, 0, 0, 0)
+		sizer_17.Add(self.next_comp_button, 0, 0, 0)
+		self.a_view_slot.Add(sizer_17, 0, 0, 0)
+		self.a_view_slot.Add(self.timer_label, 0, 0, 0)
 		self.SetSizer(self.a_view_slot)
 		self.Layout()
-		# end wxGlade
+
+	# end wxGlade
 
 	def open_controller_setup(self, event):  # wxGlade: AdminFrame.<event_handler>
 		f = ControllerOverviewFrame(self)
@@ -66,5 +112,47 @@ class AdminFrame(wx.Frame):
 	def open_audience_frame(self, event):  # wxGlade: AdminFrame.<event_handler>
 		f = AudienceFrame(self)
 		f.Show()
+
+	def start_timer(self, event):  # wxGlade: AdminFrame.<event_handler>
+		if self.mainapp.division_runner is not None:
+			self.mainapp.division_runner.start_timer()
+			self.start_timer_button.Disable()
+			self.stop_timer_button.Enable()
+			self.reset_timer_button.Disable()
+
+	def stop_timer(self, event):  # wxGlade: AdminFrame.<event_handler>
+		self.mainapp.division_runner.stop_timer()
+		self.start_timer_button.Disable()
+		self.stop_timer_button.Disable()
+		self.reset_timer_button.Enable()
+
+	def reset_timer(self, event):  # wxGlade: AdminFrame.<event_handler>
+		self.mainapp.division_runner.reset_timer()
+		self.start_timer_button.Enable()
+		self.stop_timer_button.Disable()
+		self.reset_timer_button.Disable()
+
+	def send_reset_all(self, event):  # wxGlade: AdminFrame.<event_handler>
+		for c in self.mainapp.controller_list:
+			if c is not None:
+				c.send_reset("poop")
+
+	def load_next_comp(self, event):  # wxGlade: AdminFrame.<event_handler>
+		print("Event handler 'load_next_comp' not implemented!")
+		event.Skip()
+
+	def open_division_db(self, event):  # wxGlade: AdminFrame.<event_handler>
+		file = filedialog.askopenfilename(filetypes=(('Poomsae DB', "*.db"),))
+		self.mainapp.division_runner = DivisionRunner(file)
+		print(self.mainapp.division_runner.get_next_round())
+
+	def _update_thread(self):
+		while self.continue_update:
+			self.__set_properties()
+			time.sleep(0.1)
+
+	def Close(self, event):
+		self.continue_update = False
+		self.Destroy()
 
 # end of class AdminFrame

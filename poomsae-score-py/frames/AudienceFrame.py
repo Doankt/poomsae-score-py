@@ -18,7 +18,7 @@ class AudienceFrame(wx.Frame):
 		# begin wxGlade: AudienceFrame.__init__
 		kwds["style"] = kwds.get("style", 0) | wx.BORDER_SIMPLE | wx.FULL_REPAINT_ON_RESIZE | wx.MAXIMIZE | wx.MAXIMIZE_BOX | wx.RESIZE_BORDER | wx.STAY_ON_TOP | wx.TAB_TRAVERSAL
 		wx.Frame.__init__(self, *args, **kwds)
-		self.SetSize((1934, 1094))
+		self.SetSize((993, 441))
 		self.audience_view = AudienceViewPanel(self, wx.ID_ANY)
 
 		self.__set_properties()
@@ -54,6 +54,7 @@ class AudienceFrame(wx.Frame):
 		while self.continue_update:
 			for c in c_list:
 				if c is not None:
+					self.audience_view.j1_acc.SetLabel(str(c.score.total_avg()))
 					print(c.score.complete_state())
 					print(c.score.total_avg())
 			print("~~")

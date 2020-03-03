@@ -5,36 +5,63 @@
 
 import wx
 # begin wxGlade: dependencies
+from AudienceViewPanel import AudienceViewPanel
 # end wxGlade
 
 # begin wxGlade: extracode
 # end wxGlade
-
-import ScoreGridPanel
-
+import threading
+import time
 
 class AudienceFrame(wx.Frame):
 	def __init__(self, *args, **kwds):
 		# begin wxGlade: AudienceFrame.__init__
-		kwds["style"] = kwds.get("style", 0) | wx.BORDER_SIMPLE | wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
+		kwds["style"] = kwds.get("style", 0) | wx.BORDER_SIMPLE | wx.FULL_REPAINT_ON_RESIZE | wx.MAXIMIZE | wx.MAXIMIZE_BOX | wx.RESIZE_BORDER | wx.STAY_ON_TOP | wx.TAB_TRAVERSAL
 		wx.Frame.__init__(self, *args, **kwds)
-		self.SetSize((400, 300))
+		self.SetSize((993, 441))
+		self.audience_view = AudienceViewPanel(self, wx.ID_ANY)
 
 		self.__set_properties()
 		self.__do_layout()
 		# end wxGlade
 
+		self.parent = args[0]
+		self.Bind(wx.EVT_CLOSE, self.Close)
+
+		self.continue_update = True
+		self.update_thread = threading.Thread(target=self._update_thread)
+		self.update_thread.daemon = True
+		self.update_thread.start()
+
 	def __set_properties(self):
 		# begin wxGlade: AudienceFrame.__set_properties
 		self.SetTitle("aview")
 		# end wxGlade
+		print(self.GetSize())
+		self.SetMinSize(self.GetSize())
 
 	def __do_layout(self):
 		# begin wxGlade: AudienceFrame.__do_layout
-		sizer_17 = wx.BoxSizer(wx.VERTICAL)
-		sizer_17.Add((0, 0), 0, 0, 0)
-		self.SetSizer(sizer_17)
+		sizer_2 = wx.BoxSizer(wx.VERTICAL)
+		sizer_2.Add(self.audience_view, 1, wx.EXPAND, 0)
+		self.SetSizer(sizer_2)
 		self.Layout()
 		# end wxGlade
+
+	def _update_thread(self):
+		mainapp = wx.App.Get()
+		c_list = mainapp.controller_list
+		while self.continue_update:
+			for c in c_list:
+				if c is not None:
+					self.audience_view.j1_acc.SetLabel(str(c.score.total_avg()))
+					print(c.score.complete_state())
+					print(c.score.total_avg())
+			print("~~")
+			time.sleep(2)
+
+	def Close(self, event):
+		self.continue_update = False
+		self.Destroy()
 
 # end of class AudienceFrame

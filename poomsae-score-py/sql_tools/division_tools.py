@@ -25,6 +25,16 @@ def get_division_info(conn):
                 ''')
     return cur.fetchone()
 
+def add_score(conn, r_id, c_id, j_num:int, acc:float, pres_list:[float]):
+    cur = conn.cursor()
+
+    cur.execute('''
+                    INSERT INTO Scores
+                    VALUES ({}, {}, {}, {}, {}, {}, {})
+                '''.format(r_id, c_id, j_num, acc, pres_list[0], pres_list[1], pres_list[2]))
+
+    conn.commit()
+
 def get_next_round(conn):
     #-1 division complete
     #-2 no entries
@@ -49,6 +59,14 @@ def get_next_round(conn):
             return -1
         return -2
 
-test = sql.connect(r'D:\System Locations\Documents\GitHub\poomsae-score-py\Design Files\framework.db')
-print(get_division_info(test))
-print(get_next_round(test))
+def get_round_comp_time(conn):
+    cur = conn.cursor()
+    r = get_next_round(conn)
+
+    cur.execute('''
+                    SELECT comp_time
+                    FROM Rounds
+                    WHERE r_id = {}
+                '''.format(r))
+
+    return cur.fetchone()[0]

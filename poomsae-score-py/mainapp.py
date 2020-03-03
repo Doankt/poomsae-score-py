@@ -6,7 +6,6 @@ import time
 # import competitor
 # import division
 from controllers import controller
-from frames.menu_frame import MenuFrame
 
 class MainHandler(wx.App):
     def __init__(self):
@@ -19,10 +18,10 @@ if __name__ == '__main__':
     # app = MainHandler()
     # frame = MenuFrame()
 
-    ard1 = controller.Controller('COM8')
+    ard1 = controller.Controller('COM6')
     ard1.start()
     while True:
-        print(ard1.score, sum(ard1.score))
+        print(ard1.score.total_avg())
         time.sleep(1)
         # ard1.stop()
 
