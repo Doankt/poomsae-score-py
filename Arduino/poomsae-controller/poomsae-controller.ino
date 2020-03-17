@@ -25,7 +25,8 @@ LiquidCrystal_I2C lcd(0x27, 20, 4); // SDA - A4, SCL - A5
 int IMODE = 0;
 String CNAME = "NO COMPETITOR";
 bool RESET_SIG = false;
-float score[2];
+float ACC;
+float PRES[3];
 unsigned long last_ping;
 
 
@@ -152,7 +153,7 @@ void acc_mode(){
       reset_bt();
     }
     if(data_pb.isHeld()){
-      score[0] = acc;
+      ACC = acc;
       lcd.clear();
       break;
     }
@@ -235,9 +236,8 @@ void pres_mode(){
     if(data_pb.isHeld()){
       float tot = 0;
       for(int i = 0; i < 3; i++){
-        tot += pres[i];
+        PRES[i] = pres[i];
       }
-      score[1] = tot;
       lcd.clear();
       break;
     }
@@ -266,17 +266,17 @@ void total_lcd_update(){
   lcd.setCursor(1,0);
   lcd.print("WAIT FOR NEXT SYNC");
   lcd.setCursor(0,1);
-  dtostrf(score[0], 2, 1, res);
+  dtostrf(ACC, 2, 1, res);
   lcd.print("Acc: ");
   lcd.print(res);
   lcd.setCursor(0,2);
   
-  dtostrf(score[1], 2, 1, res);
+  dtostrf(sum_pres(), 2, 1, res);
   lcd.print("Pres: ");
   lcd.print(res);
   lcd.setCursor(0,3);
 
-  dtostrf(score[0] + score[1], 2, 1, res);
+  dtostrf(ACC + sum_pres(), 2, 1, res);
   lcd.print("Total: ");
   lcd.print(res);
 }
@@ -307,9 +307,13 @@ void total_mode(){
   } 
 }
 
+float sum_pres(){
+  return PRES[0] + PRES[1] + PRES[2];
+}
+
 void send_acc(){
   char res[5];
-  dtostrf(score[0], 1, 1, res);
+  dtostrf(ACC, 1, 1, res);
   interface_write(ACC_CHAR);
   interface_write(res);
   interface_write(END_CHAR);
@@ -317,9 +321,19 @@ void send_acc(){
 
 void send_pres(){
   char res[5];
-  dtostrf(score[1], 1, 1, res);
   interface_write(PRES_CHAR);
+  
+  dtostrf(PRES[0], 1, 1, res);
   interface_write(res);
+  interface_write(" ");
+
+  dtostrf(PRES[1], 1, 1, res);
+  interface_write(res);
+  interface_write(" ");
+
+  dtostrf(PRES[2], 1, 1, res);
+  interface_write(res);
+  
   interface_write(END_CHAR);
 }
 
@@ -348,14 +362,19 @@ void setup() {
   add_minor_pb.disableDoubleClick();
   sub_minor_pb.disableDoubleClick();
   
-  score[0] = 0.0;
-  score[1] = 0.0;
+  ACC = 0.0;
+  PRES[0] = 0.0;
+  PRES[1] = 0.0;
+  PRES[2] = 0.0;
  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   RESET_SIG = false;
+  while(interface_available()){
+    interface_read();
+  }
   acc_mode();
   if(RESET_SIG) goto reset_sig;
   send_acc();

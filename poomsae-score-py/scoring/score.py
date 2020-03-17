@@ -7,10 +7,15 @@ def _valid_accuracy(a: float):
     return a is None or 0 <= a <= MAX_ACCURACY
 
 def _valid_presentation(p: float):
-    return p is None or 0 <= p <= MAX_PRESENTATIO
+    if p is None: return True
+    if len(p) != 3: return False
+    for i in range(3):
+        if p[i] is None or p[i] < 0 or p[i] > 2.0:
+            return False
+    return True
 
 class Score:
-    def __init__(self, a: float = None, p: float = None):
+    def __init__(self, a: float = None, p: list = None):
         if _valid_accuracy(a): self.accuracy = a
         else:   raise ValueError("Accuracy a= {} is out of bounds".format(a))
         
@@ -21,10 +26,21 @@ class Score:
         if self.accuracy is None:   a = 0.0
         else:   a = self.accuracy
 
-        if self.presentation is None: p = 0.0
+        if self.presentation is None: p = [0.0, 0.0, 0.0]
         else: p = self.presentation
 
-        return round(a + p, 1)
+        print(round(a + sum(p), 1))
+        return round(a + sum(p), 1)
+
+    def get_acc(self):
+        if self.accuracy is not None:
+            return self.accuracy
+        return 0.0
+
+    def get_total_pres(self):
+        if self.presentation is not None:
+            return sum(self.presentation)
+        return 0.0
 
     def complete_state(self):
         #0 none

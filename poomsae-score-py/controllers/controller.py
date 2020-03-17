@@ -40,19 +40,25 @@ class Controller:
         while self.continue_read_thread:
             try:
                 data = self.ser.read(1)
-                print(self.score.total_avg())
-                if data == ACC_CHAR or data == PRES_CHAR:
-                    #Recieving Score
-                    sec = data
+                if data == ACC_CHAR:
                     string = ""
                     while True:
                         data = self.ser.read(1)
                         if data == END_CHAR: break
                         string += data.decode('utf-8')
 
-                    if sec == ACC_CHAR:    self.score.accuracy = float(string)
-                    else:   self.score.presentation = float(string)
-                    print(self.score.total_avg())
+                    self.score.accuracy = float(string)
+                elif data == PRES_CHAR:
+                    string = ""
+                    while True:
+                        data = self.ser.read(1)
+                        if data == END_CHAR: break
+                        string += data.decode('utf-8')
+                    tok = [float(s) for s in string.split()]
+                    self.score.presentation = [None]*3
+                    for i in range(3):
+                        self.score.presentation[i] = tok[i]
+
                 elif data == SCORE_RESET_CHAR:
                     self.score = Score()
                 elif data == PING_CHAR:
