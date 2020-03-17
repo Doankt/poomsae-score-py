@@ -45,7 +45,6 @@ class AudienceFrame(wx.Frame):
 		sizer_2 = wx.BoxSizer(wx.VERTICAL)
 		sizer_2.Add(self.audience_view, 1, wx.EXPAND, 0)
 		self.SetSizer(sizer_2)
-		self.Layout()
 		# end wxGlade
 
 	def _update_thread(self):
@@ -54,10 +53,12 @@ class AudienceFrame(wx.Frame):
 		while self.continue_update:
 			for c in c_list:
 				if c is not None:
-					self.audience_view.j1_acc.SetLabel(str(c.score.total_avg()))
-					print(c.score.complete_state())
-					print(c.score.total_avg())
+					self.audience_view.j1_acc.SetLabel(str(c.score.get_acc()))
+					self.audience_view.j1_acc.GetParent().Layout()
+					self.audience_view.j1_pres.SetLabel(str(c.score.get_total_pres()))
+					self.audience_view.j1_pres.GetParent().Layout()
 			print("~~")
+			# self.Layout()
 			time.sleep(2)
 
 	def Close(self, event):
