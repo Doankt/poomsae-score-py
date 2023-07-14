@@ -1,4 +1,6 @@
 .idea/
 .project
 .pydevproject
+.venv
+venv
 poomsae-score-py/**/*.pyc
